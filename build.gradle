@@ -1,0 +1,34 @@
+plugins {
+    id 'scala'
+}
+
+group 'net.nh'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.0'
+    compile 'io.gatling.highcharts:gatling-charts-highcharts:3.4.2'
+}
+
+task gatling(type: JavaExec) {
+    dependsOn testClasses
+    description = "Gatling Load Test Dandbox"
+    group = "net.nh"
+    classpath = sourceSets.test.runtimeClasspath
+    jvmArgs = [
+            "-Dgatling.core.directory.binaries=${sourceSets.test.output.classesDirs.toString()}",
+            "-Dserver.port=${project.serverPort}",
+            "-Dmin.concurrent.users=${project.minConcurrentUsersPerSec}",
+            "-Dmax.concurrent.users=${project.maxConcurrentUsersPerSec}",
+            "-Dtest.duration=${project.testDurationMins}"
+    ]
+    main = "io.gatling.app.Gatling"
+    args = [
+            "--simulation", project.testName,
+            "--results-folder", "${buildDir}/gatling-results",
+            "--binaries-folder", sourceSets.test.output.classesDirs.toString()
+    ]
+}
